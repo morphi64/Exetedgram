@@ -27,8 +27,26 @@ jobs:
           packages: 'platform-tools platforms;android-35 build-tools;35.0.0'
 
       - name: Extract project ZIP
+        run: unzip -q Exetedgram_Cloud_Build_Project.zip -d project
+
+      - name: Set Java and Kotlin target to 17
         run: |
-          unzip -q Exetedgram_Cloud_Build_Project.zip -d project
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("project/ExetedgramAndroid/app/build.gradle")
+          s = p.read_text()
+          addition = """
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_17
+                  targetCompatibility JavaVersion.VERSION_17
+              }
+              kotlinOptions {
+                  jvmTarget = '17'
+              }
+          """
+          s = s.rsplit("}", 1)[0] + addition + "}\n"
+          p.write_text(s)
+          PY
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
